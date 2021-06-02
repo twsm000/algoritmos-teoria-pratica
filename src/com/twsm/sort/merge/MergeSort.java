@@ -1,6 +1,6 @@
 package com.twsm.sort.merge;
 
-import java.util.Arrays;
+import java.lang.reflect.Array;
 import java.util.function.ToIntBiFunction;
 
 public class MergeSort {
@@ -11,10 +11,17 @@ public class MergeSort {
 
         int start = 0;
         int end = array.length - 1;
-        mergeSort(array, start, end, conditionalOrder);
+
+        var tmp = newHalfArray(array);
+        mergeSort(array, tmp, start, end, conditionalOrder);
+    }
+
+    private static <T extends Comparable<? super T>> T[] newHalfArray(T[] array) {
+        return (T[]) Array.newInstance(array.getClass().getComponentType(), array.length / 2);
     }
 
     private static <T extends Comparable<? super T>> void mergeSort(T[] array,
+                                                                    T[] tmp,
                                                                     int start,
                                                                     int end,
                                                                     ToIntBiFunction<T, T> conditionalOrder) {
@@ -22,34 +29,36 @@ public class MergeSort {
             return;
         }
 
-        int middle = (start + end) / 2;
-        mergeSort(array, start, middle, conditionalOrder);
-        mergeSort(array, middle + 1, end, conditionalOrder);
+        int middle = (start + end) / 2 + 1;
+        mergeSort(array, tmp, start, middle - 1, conditionalOrder);
+        mergeSort(array, tmp, middle, end, conditionalOrder);
 
-        merge(array, start, middle, end, conditionalOrder);
+        merge(array, tmp, start, middle, end, conditionalOrder);
     }
 
     private static <T extends Comparable<? super T>> void merge(T[] array,
+                                                                T[] tmp,
                                                                 int start,
                                                                 int middle,
                                                                 int end,
                                                                 ToIntBiFunction<T, T> conditionalOrder) {
 
-        var tmp = Arrays.copyOfRange(array, start, middle + 1);
+        int tmpSize = middle - start;
+        System.arraycopy(array, start, tmp, 0, tmpSize);
         int current = start;
-        int i = 0;
-        int j = middle + 1;
+        int firstHalf = 0;
+        int secondHalf = middle;
 
-        while (i < tmp.length && j <= end) {
-            if (conditionalOrder.applyAsInt(tmp[i], array[j]) < 0) {
-                array[current++] = tmp[i++];
+        while (firstHalf < tmpSize && secondHalf <= end) {
+            if (conditionalOrder.applyAsInt(tmp[firstHalf], array[secondHalf]) < 0) {
+                array[current++] = tmp[firstHalf++];
             } else {
-                array[current++] = array[j++];
+                array[current++] = array[secondHalf++];
             }
         }
 
-        while (i < tmp.length) {
-            array[current++] = tmp[i++];
+        while (firstHalf < tmpSize) {
+            array[current++] = tmp[firstHalf++];
         }
     }
 }

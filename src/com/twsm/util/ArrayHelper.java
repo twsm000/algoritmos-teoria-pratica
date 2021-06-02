@@ -11,6 +11,11 @@ public class ArrayHelper {
                 .toArray(Integer[]::new);
     }
 
+    public static int[] generateInt(int size, int minValue, int maxValue) {
+        return new Random().ints(size, minValue, maxValue)
+                .toArray();
+    }
+
     public static <T> void display(T[] array) {
         System.out.println(Arrays.stream(array)
                 .map(String::valueOf)
